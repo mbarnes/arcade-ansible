@@ -1,0 +1,117 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Configures a Raspberry Pi as an arcade machine, using the Attract-Mode
+# emulator frontend to launch MAME.
+#
+# The machine should already have network and SSH service available.
+#
+- hosts: arcade
+  remote_user: pi
+  vars:
+  - new_hostname: arcade
+
+  tasks:
+
+  # FIXME Ansible 2.3: Add name
+  # name: System-level tasks
+  - become: yes
+    block:
+
+    - name: Set hostname to arcade
+      hostname:
+        name: "{{ new_hostname }}"
+
+    - name: Update 127.0.1.1 hosts entry
+      lineinfile:
+        # FIXME Ansible 2.3: Change name to path
+        name: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1\t{{ new_hostname }}"
+
+    - name: Configure HDMI parameters
+      lineinfile:
+        # FIXME Ansible 2.3: Change name to path
+        name: /boot/config.txt
+        regexp: "{{ item.regexp }}"
+        line: "{{ item.line }}"
+      with_items:
+      # Use HDMI mode even if no HDMI monitor is detected
+      - {regexp: '^#?hdmi_force_hotplug=', line: "hdmi_force_hotplug=1"}
+      # hdmi_group: DMT / hdmi_mode: 1024x768 60 Hz
+      - {regexp: '^#?hdmi_group=',         line: "hdmi_group=2"}
+      - {regexp: '^#?hdmi_mode=',          line: "hdmi_mode=16"}
+
+    - name: Install required packages
+      package:
+        name:
+        - tmux
+        - vim
+        - xinit
+        # Required for libsfml
+        # FIXME I think libgles*-mesa can be removed
+        - libgles1-mesa
+        - libgles2-mesa
+        - libxcb-icccm4
+        - libxcb-image0
+        - libxcb-randr0
+        - libxcb-util0
+        # Required for attract
+        - libavformat57
+        - libopenal1
+        - libswscale4
+        state: present
+
+    - name: Allow anybody to run the X server
+      lineinfile:
+        # FIXME Ansible 2.3: Change name to path
+        name: /etc/X11/Xwrapper.config
+        regexp: '^allowed_users='
+        line: "allowed_users=anybody"
+
+    - name: Configure systemd to launch the X server
+      copy:
+        src: xinit.conf
+        dest: /etc/systemd/system/getty@tty1.service.d/
+
+    - name: Copy custom libraries for Raspberry Pi
+      copy:
+        src: "lib/{{ item }}"
+        dest: /usr/local/lib
+      with_items:
+      - libSDL2-2.0.so.0.8.0
+      - libSDL2_ttf-2.0.so.0.14.0
+      - libsfml-graphics.so.2.2
+      - libsfml-network.so.2.2
+      - libsfml-system.so.2.2
+      - libsfml-window.so.2.2
+
+    - name: Run ldconfig on custom libraries
+      command: ldconfig /usr/local/lib
+
+    - name: Synchronize default configuration files for Attract-Mode
+      synchronize:
+        src: attract
+        dest: /usr/local/share
+
+    # End of block
+
+  - name: Create MAME directory structure
+    file:
+      path: "{{ ansible_user_dir }}/{{ item }}"
+      state: directory
+    with_items:
+    - mame
+    - mame/auxroms
+    - mame/cfg
+    - mame/flyers
+    - mame/hi
+    - mame/roms
+    - mame/snaps
+    - mame/videos
+
+  - name: Synchronize home directory files
+    synchronize:
+      src: home/
+      dest: "{{ ansible_user_dir }}"
+
