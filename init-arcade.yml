@@ -47,9 +47,6 @@
         - vim
         - xinit
         # Required for libsfml
-        # FIXME I think libgles*-mesa can be removed
-        - libgles1-mesa
-        - libgles2-mesa
         - libxcb-icccm4
         - libxcb-image0
         - libxcb-randr0
