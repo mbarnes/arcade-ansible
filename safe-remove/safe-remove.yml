@@ -1,0 +1,58 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Safely removes the chroot directory created by qemu-build.yml.
+#
+# In particular, it removes any bind mounts before recursively
+# deleting the chroot directory.
+#
+# To run:
+# sudo safe-remove.yml -e cli_chroot_path=/path/to/chroot
+#
+
+- hosts: localhost
+  vars:
+    bind_mounts:
+    - proc
+    - sys
+    - dev
+
+  tasks:
+
+  - name: Check if user is root
+    fail:
+      msg: "This playbook must be run as root"
+    when: ansible_user_uid != 0
+
+  - name: Check for required variables
+    fail:
+      msg: "Variable {{ item }} is not defined"
+    when: item is undefined
+    with_items:
+    - cli_chroot_path
+
+  - name: Confirm deletion
+    pause:
+      prompt: |
+
+        Proceed with deletion of {{ cli_chroot_path }}?
+
+        To continue, press Enter.  To stop, press Ctrl-C and then 'A' to abort.
+
+  - name: Find existing bind mounts in chroot directory
+    command: "findmnt --mountpoint {{ cli_chroot_path }}/{{ item }}"
+    register: bind_mount_status
+    ignore_errors: yes
+    with_items: "{{ bind_mounts }}"
+
+  - name: Remove bind mounts in chroot directory
+    command: "umount {{ cli_chroot_path }}/{{ item.item }}"
+    when: item.rc == 0
+    with_items: "{{ bind_mount_status.results }}"
+    args:
+      warn: false
+
+  - name: Remove chroot directory
+    file:
+      path: "{{ cli_chroot_path }}"
+      state: absent
