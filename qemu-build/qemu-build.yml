@@ -1,0 +1,305 @@
+#!/usr/bin/ansible-playbook
+---
+#
+# Builds software for a Raspberry Pi based arcade machine in a
+# qemu-arm-static chroot environment.
+#
+# Cross-compilation is faster and helps extend the life of the
+# Raspberry Pi's SD card.
+#
+# To run:
+# sudo qemu-build.yml -e cli_image_file=/path/to/raspbian.img \
+#                     -e cli_chroot_path=/path/to/chroot
+#
+
+# PHASE 1: Prepare chroot environment
+- hosts: localhost
+  vars:
+    bind_mounts:
+    - proc
+    - sys
+    - dev
+
+  tasks:
+
+  - name: Check if user is root
+    fail:
+      msg: "This playbook must be run as root"
+    when: ansible_user_uid != 0
+
+  - name: Check for required variables
+    fail:
+      msg: "Variable {{ item }} is not defined"
+    when: item is undefined
+    with_items:
+    - cli_image_file
+    - cli_chroot_path
+
+  - name: Copy files from image into chroot directory
+    script: "rpi_copyrootfs.sh -i {{ cli_image_file }} -d {{ cli_chroot_path }}"
+    args:
+      creates: "{{ cli_chroot_path }}"
+
+  - name: Copy /etc/resolv.conf into chroot directory
+    copy:
+      src: /etc/resolv.conf
+      dest: "{{ cli_chroot_path }}/etc/resolv.conf"
+      mode: preserve
+
+  - name: Copy qemu-arm-static into chroot directory
+    copy:
+      src: /usr/bin/qemu-arm-static
+      dest: "{{ cli_chroot_path }}/bin/qemu-arm-static"
+      mode: preserve
+
+  - name: Create a mock shell for Ansible's chroot plugin
+    copy:
+      content: |
+        #!/bin/sh
+        /bin/qemu-arm-static /bin/sh $@
+      dest: "{{ cli_chroot_path }}/bin/qemu-sh"
+      mode: '0755'
+      owner: root
+      group: root
+
+  - name: Check for mount points in chroot directory
+    stat:
+      path: "{{ cli_chroot_path }}/{{ item }}"
+    with_items: "{{ bind_mounts }}"
+    register: mount_point_stat
+
+  - name: Validate mount points in chroot directory
+    fail:
+      msg: "Missing mount point: {{ cli_chroot_path }}/{{ item.item }}"
+    when: not (item.stat.exists and item.stat.isdir)
+    with_items: "{{ mount_point_stat.results }}"
+
+  - name: Find existing bind mounts in chroot directory
+    command: "findmnt --mountpoint {{ cli_chroot_path }}/{{ item }}"
+    register: bind_mount_status
+    ignore_errors: yes
+    with_items: "{{ bind_mounts }}"
+
+  - name: Create missing bind mounts in chroot directory
+    command: "mount --bind /{{ item.item }} {{ cli_chroot_path }}/{{ item.item }}"
+    when: item.rc == 1
+    with_items: "{{ bind_mount_status.results }}"
+    args:
+      warn: false
+
+  - name: Comment out ld.so.preload in chroot directory
+    replace:
+      path: "{{ cli_chroot_path }}/etc/ld.so.preload"
+      regexp: '^(/.+)$'
+      replace: '#\1'
+
+  - name: Add chroot path to inventory for next play
+    add_host:
+      name: "{{ cli_chroot_path }}"
+      groups: chroot_group
+      ansible_connection: chroot
+      ansible_executable: /bin/qemu-sh
+
+
+# PHASE 2: Build software for ARM architecture
+- hosts: chroot_group
+  become: yes
+  become_user: pi
+  vars:
+    git_base_dir: "{{ ansible_user_dir }}/git"
+    sdl_git_repo_url: https://github.com/SDL-mirror/SDL.git
+    sdl_git_repo_ref: release-2.0.10
+    sdlttf_git_repo_url: https://github.com/SDL-mirror/SDL_ttf.git
+    sdlttf_git_repo_ref: release-2.0.15
+    mame_git_repo_url: https://github.com/mbarnes/mame.git
+    mame_git_repo_ref: subtarget-cocktail-0172
+    sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
+    sfml_pi_git_repo_ref: master
+    attract_git_repo_url: https://github.com/mickelson/attract.git
+    attract_git_repo_ref: master
+
+  tasks:
+
+  - name: Install build dependencies
+    apt:
+      # Allow duplicates here if multiple
+      # components have a common dependency.
+      name:
+      - git
+      - build-essential
+      # For SDL
+      - automake
+      # For MAME
+      - libasound2-dev
+      - libflac-dev
+      - libfontconfig1-dev
+      - libjpeg62-turbo-dev
+      - libraspberrypi-dev
+      - libsqlite3-dev
+      - libuv1-dev
+      # For SFML
+      - cmake
+      - libflac-dev
+      - libogg-dev
+      - libopenal-dev
+      - libraspberrypi-dev
+      - libudev-dev
+      - libvorbis-dev
+      # For Attract-Mode
+      - libarchive-dev
+      - libavcodec-dev
+      - libavformat-dev
+      - libavresample-dev
+      - libcurl4-openssl-dev
+      - libfontconfig1-dev
+      - libjpeg62-turbo-dev
+      - libopenal-dev
+      - libswresample-dev
+      - libswscale-dev
+      update_cache: yes
+    become: yes
+    become_user: root
+
+  - name: Create git directory
+    file:
+      path: "{{ git_base_dir }}"
+      state: directory
+
+  - name: Clone SDL from git
+    git:
+      repo: "{{ sdl_git_repo_url }}"
+      dest: "{{ git_base_dir }}/SDL"
+      version: "{{ sdl_git_repo_ref }}"
+      depth: 1
+      # Running configure creates local
+      # modifications in the repository
+      force: yes
+
+  - name: Configure SDL to use OpenGL ES
+    command:
+      chdir: "{{ git_base_dir }}/SDL"
+      argv:
+      - "./configure"
+      - "--host=armv7l-raspberry-linux-gnueabihf"
+      - "--disable-pulseaudio"
+      - "--disable-esd"
+      - "--disable-video-mir"
+      - "--disable-video-wayland"
+      - "--disable-video-x11"
+      - "--disable-video-opengl"
+
+  - name: Build SDL from git
+    make:
+      chdir: "{{ git_base_dir }}/SDL"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+
+  - name: Install SDL as root
+    make:
+      chdir: "{{ git_base_dir }}/SDL"
+      target: install
+    become: yes
+    become_user: root
+
+  - name: Clone SDL_ttf from git
+    git:
+      repo: "{{ sdlttf_git_repo_url }}"
+      dest: "{{ git_base_dir }}/SDL_ttf"
+      version: "{{ sdlttf_git_repo_ref }}"
+      depth: 1
+
+  - name: Configure SDL_ttf
+    command:
+      chdir: "{{ git_base_dir }}/SDL_ttf"
+      argv:
+      - "./configure"
+
+  - name: Build SDL_ttf from git
+    make:
+      chdir: "{{ git_base_dir }}/SDL_ttf"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+
+  - name: Install SDL_ttf as root
+    make:
+      chdir: "{{ git_base_dir }}/SDL_ttf"
+      target: install
+    become: yes
+    become_user: root
+
+  - name: Run ldconfig as root
+    command: /sbin/ldconfig
+    become: yes
+    become_user: root
+
+  - name: Clone MAME from git
+    git:
+      repo: "{{ mame_git_repo_url }}"
+      dest: "{{ git_base_dir }}/mame"
+      version: "{{ mame_git_repo_ref }}"
+      # Depth should be sufficient to cover all
+      # my customizations for SUBTARGET=cocktail.
+      depth: 40
+
+  - name: Build MAME from git (this can take a LONG time)
+    make:
+      chdir: "{{ git_base_dir }}/mame"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+        NOWERROR: 1
+        TARGETOS: rpi
+        RASPBERRY_SYSROOT: /
+        RASPBERRY_SDK_PATH: /usr
+        USE_SYSTEM_LIB_EXPAT: 1
+        USE_SYSTEM_LIB_ZLIB: 1
+        USE_SYSTEM_LIB_JPEG: 1
+        # FLAC not needed?
+        USE_SYSTEM_LIB_FLAC: 1
+        USE_SYSTEM_LIB_SQLITE3: 1
+        USE_SYSTEM_LIB_UV: 1
+
+  - name: Clone SFML for the Raspberry Pi from git
+    git:
+      repo: "{{ sfml_pi_git_repo_url }}"
+      dest: "{{ git_base_dir }}/sfml-pi"
+      version: "{{ sfml_pi_git_repo_ref }}"
+      depth: 1
+
+  - name: Prepare SFML for the Raspberry Pi sources
+    command:
+      chdir: "{{ git_base_dir }}/sfml-pi"
+      argv:
+        - "/usr/bin/cmake"
+        - "-DSFML_RPI=1"
+        - "-DEGL_INCLUDE_DIR=/opt/vc/include"
+        - "-DEGL_LIBRARY=/opt/vc/lib/libbrcmEGL.so"
+        - "-DGLES_INCLUDE_DIR=/opt/vc/include"
+        - "-DGLES_LIBRARY=/opt/vc/lib/libbrcmGLESv2.so"
+        - "."
+
+  - name: Build SFML for the Raspberry Pi from git
+    make:
+      chdir: "{{ git_base_dir }}/sfml-pi"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+
+  - name: Install SFML for the Raspberry Pi as root
+    make:
+      chdir: "{{ git_base_dir }}/sfml-pi"
+      target: install
+    become: yes
+    become_user: root
+
+  - name: Clone Attract-Mode from git
+    git:
+      repo: "{{ attract_git_repo_url }}"
+      dest: "{{ git_base_dir }}/attract"
+      version: "{{ attract_git_repo_ref }}"
+      depth: 1
+
+  - name: Build Attract-Mode from git
+    make:
+      chdir: "{{ git_base_dir }}/attract"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+        USE_GLES: 1
