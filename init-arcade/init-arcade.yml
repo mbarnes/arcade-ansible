@@ -1,15 +1,30 @@
 #!/usr/bin/ansible-playbook
 ---
 #
-# Configures a Raspberry Pi as an arcade machine, using the Attract-Mode
-# emulator frontend to launch MAME.
+# Configures hosts in an inventory group named "arcade_group" consisting
+# of real Raspberry Pi devices with networking and SSH service available.
 #
-# The machine should already have network and SSH service available.
+# Also installs software built with the qemu-build.yml playbook to these
+# Raspberry Pi devices.
 #
-- hosts: arcade
+# To run:
+# init-arcade.yml -e cli_chroot_path=/path/to/chroot
+#
+
+- hosts: localhost
+
+  tasks:
+
+  - name: Check for required variables
+    fail:
+      msg: "Variable {{ item }} is not defined"
+    when: item is undefined
+    with_items:
+    - cli_chroot_path
+
+
+- hosts: arcade_group
   remote_user: pi
-  vars:
-  - new_hostname: arcade
 
   tasks:
 
@@ -19,13 +34,13 @@
 
     - name: Set hostname to arcade
       hostname:
-        name: "{{ new_hostname }}"
+        name: "{{ inventory_hostname }}"
 
     - name: Update 127.0.1.1 hosts entry
       lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1'
-        line: "127.0.1.1\t{{ new_hostname }}"
+        line: "127.0.1.1\t{{ inventory_hostname }}"
 
     - name: Configure HDMI parameters
       lineinfile:
@@ -43,12 +58,10 @@
         - tmux
         - vim
         - xinit
-        # Required for libsfml
-        - libxcb-icccm4
-        - libxcb-image0
-        - libxcb-randr0
-        - libxcb-util0
-        # Required for attract
+        # For MAME
+        - libuv1
+        # For Attract-Mode
+        - libarchive13
         - libavformat57
         - libopenal1
         - libswscale4
@@ -65,19 +78,12 @@
         src: xinit.conf
         dest: /etc/systemd/system/getty@tty1.service.d/
 
-    - name: Copy custom libraries for Raspberry Pi
-      copy:
-        src: "lib/{{ item }}"
+    - name: Synchronize locally built libraries
+      synchronize:
+        src: "{{ cli_chroot_path }}/usr/local/lib/"
         dest: /usr/local/lib
-      with_items:
-      - libSDL2-2.0.so.0.8.0
-      - libSDL2_ttf-2.0.so.0.14.0
-      - libsfml-graphics.so.2.2
-      - libsfml-network.so.2.2
-      - libsfml-system.so.2.2
-      - libsfml-window.so.2.2
 
-    - name: Run ldconfig on custom libraries
+    - name: Run ldconfig on new libraries
       command: ldconfig /usr/local/lib
 
     - name: Synchronize default configuration files for Attract-Mode
@@ -107,3 +113,11 @@
       src: home/
       dest: "{{ ansible_user_dir }}"
 
+  - name: Copy locally built binaries
+    copy:
+      src: "{{ cli_chroot_path }}/home/pi/git/{{ item }}"
+      dest: "{{ ansible_user_dir }}/bin/"
+      mode: preserve
+    with_items:
+    - attract/attract
+    - mame/mamecocktail

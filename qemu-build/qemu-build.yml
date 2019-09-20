@@ -253,7 +253,6 @@
         USE_SYSTEM_LIB_EXPAT: 1
         USE_SYSTEM_LIB_ZLIB: 1
         USE_SYSTEM_LIB_JPEG: 1
-        # FLAC not needed?
         USE_SYSTEM_LIB_FLAC: 1
         USE_SYSTEM_LIB_SQLITE3: 1
         USE_SYSTEM_LIB_UV: 1
