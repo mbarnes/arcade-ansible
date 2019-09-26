@@ -1,7 +1,7 @@
 #!/usr/bin/ansible-playbook
 ---
 #
-# Safely removes the chroot directory created by qemu-build.yml.
+# Safely removes the chroot directory created by init-arcade.yml.
 #
 # In particular, it removes any bind mounts before recursively
 # deleting the chroot directory.
