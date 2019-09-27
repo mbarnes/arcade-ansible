@@ -172,6 +172,18 @@
       path: "{{ git_base_dir }}"
       state: directory
 
+  # SDL modifies its own "include/SDL_config.h" during
+  # configuration.  To avoid needless recompilation on
+  # future playbook runs, note the file's modification
+  # time before reconfiguring the source code and then
+  # restore the modification time if the file contents
+  # have not changed.
+
+  - name: Examine SDL_config.h
+    stat:
+      path: "{{ git_base_dir }}/SDL/include/SDL_config.h"
+    register: sdl_config_h_old
+
   - name: Clone SDL from git
     git:
       repo: "{{ sdl_git_repo_url }}"
@@ -194,6 +206,20 @@
       - "--disable-video-wayland"
       - "--disable-video-x11"
       - "--disable-video-opengl"
+
+  - name: Examine SDL_config.h
+    stat:
+      path: "{{ sdl_config_h_old.stat.path }}"
+    register: sdl_config_h_new
+    when: sdl_config_h_old.stat.exists
+
+  - name: Restore SDL_config.h modification time
+    file:
+      path: "{{ sdl_config_h_old.stat.path }}"
+      modification_time: "{{ '%Y%m%d%H%M.%S' | strftime(sdl_config_h_old.stat.mtime) }}"
+    when:
+    - sdl_config_h_old.stat.exists
+    - sdl_config_h_old.stat.checksum == sdl_config_h_new.stat.checksum
 
   - name: Build SDL from git
     make:
