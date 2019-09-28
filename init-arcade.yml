@@ -18,6 +18,8 @@
 # init-arcade.yml -e cli_chroot_path=/path/to/chroot \
 #                 -e cli_image_file=/path/to/raspbian.img
 #
+# To skip the build phase, add -e cli_skip_build=true.
+#
 
 # PHASE 1: Prepare chroot environment
 - hosts: localhost
@@ -126,6 +128,10 @@
     attract_git_repo_ref: master
 
   tasks:
+
+  - name: Skip build if cli_skip_build requested
+    meta: end_play
+    when: cli_skip_build | default(false)
 
   - name: Install build dependencies
     apt:
