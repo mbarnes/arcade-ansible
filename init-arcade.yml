@@ -383,9 +383,9 @@
         - libuv1
         # For Attract-Mode
         - libarchive13
-        - libavformat57
+        - libavformat58
         - libopenal1
-        - libswscale4
+        - libswscale5
         state: present
 
     - name: Allow anybody to run the X server
