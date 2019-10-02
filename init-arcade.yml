@@ -458,3 +458,16 @@
     failed_when:
     - attract_build_romlist.changed
     - attract_build_romlist.rc != 1
+
+  - name: Scrape artwork for mame (first time only)
+    command: /usr/local/bin/attract --scrape-art mame
+    when: attract_build_romlist.changed
+    register: attract_scrape_art
+    # XXX Attract-Mode's C++ code for this routine returns a
+    #     bool, which is (incorrectly) used as the exit code.
+    failed_when:
+    - attract_scrape_art.changed
+    - attract_scrape_art.rc != 1
+    # Ignore any scraping errors since it's non-critical and
+    # depends on 3rd party services which may be unavailable.
+    ignore_errors: yes
