@@ -1,2 +1,2 @@
 #!/bin/sh
-$HOME/bin/attract
+/usr/local/bin/attract
