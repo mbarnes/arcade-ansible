@@ -296,6 +296,15 @@
         USE_SYSTEM_LIB_SQLITE3: 1
         USE_SYSTEM_LIB_UV: 1
 
+  - name: Install MAME binary
+    copy:
+      src: "{{ git_base_dir }}/mame/mamecocktail"
+      dest: /usr/local/bin/mamecocktail
+      remote_src: yes
+      mode: preserve
+    become: yes
+    become_user: root
+
   - name: Clone SFML for the Raspberry Pi from git
     git:
       repo: "{{ sfml_pi_git_repo_url }}"
@@ -439,14 +448,6 @@
     synchronize:
       src: home/
       dest: "{{ ansible_user_dir }}"
-
-  - name: Copy locally built binaries
-    copy:
-      src: "{{ cli_chroot_path }}/home/pi/git/{{ item }}"
-      dest: "{{ ansible_user_dir }}/bin/"
-      mode: preserve
-    with_items:
-    - mame/mamecocktail
 
   - name: Generate romlist for mame (first time only)
     command: /usr/local/bin/attract --build-romlist mame
