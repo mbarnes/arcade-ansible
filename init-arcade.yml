@@ -342,6 +342,15 @@
         "--jobs": "{{ ansible_processor_vcpus }}"
         USE_GLES: 1
 
+  - name: Install Attract-Mode as root
+    make:
+      chdir: "{{ git_base_dir }}/attract"
+      target: install
+      params:
+        USE_GLES: 1
+    become: yes
+    become_user: root
+
 
 # PHASE 3: Configure Raspberry Pi hosts
 - hosts: arcade_group
@@ -401,18 +410,13 @@
         src: xinit.conf
         dest: /etc/systemd/system/getty@tty1.service.d/
 
-    - name: Synchronize locally built libraries
+    - name: Synchronize locally installed software
       synchronize:
-        src: "{{ cli_chroot_path }}/usr/local/lib/"
-        dest: /usr/local/lib
+        src: "{{ cli_chroot_path }}/usr/local/"
+        dest: /usr/local
 
     - name: Run ldconfig on new libraries
       command: ldconfig /usr/local/lib
-
-    - name: Synchronize default configuration files for Attract-Mode
-      synchronize:
-        src: attract
-        dest: /usr/local/share
 
     # End of block
 
@@ -442,5 +446,4 @@
       dest: "{{ ansible_user_dir }}/bin/"
       mode: preserve
     with_items:
-    - attract/attract
     - mame/mamecocktail
