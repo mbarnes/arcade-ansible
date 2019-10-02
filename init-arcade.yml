@@ -447,3 +447,14 @@
       mode: preserve
     with_items:
     - mame/mamecocktail
+
+  - name: Generate romlist for mame (first time only)
+    command: /usr/local/bin/attract --build-romlist mame
+    args:
+      creates: "{{ ansible_user_dir }}/.attract/romlists/mame.txt"
+    register: attract_build_romlist
+    # XXX Attract-Mode's C++ code for this routine returns a
+    #     bool, which is (incorrectly) used as the exit code.
+    failed_when:
+    - attract_build_romlist.changed
+    - attract_build_romlist.rc != 1
