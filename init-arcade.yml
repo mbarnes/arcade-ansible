@@ -23,6 +23,7 @@
 
 # PHASE 1: Prepare chroot environment
 - hosts: localhost
+  connection: local
   vars:
     bind_mounts:
     - proc

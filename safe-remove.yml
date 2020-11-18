@@ -11,6 +11,7 @@
 #
 
 - hosts: localhost
+  connection: local
   vars:
     bind_mounts:
     - proc
