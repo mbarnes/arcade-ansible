@@ -20,6 +20,10 @@
 #
 # To skip the build phase, add -e cli_skip_build=true.
 #
+# References:
+# - GCC compiler optimization for ARM-based systems
+#   https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
+#
 
 # PHASE 1: Prepare chroot environment
 - hosts: localhost
@@ -127,6 +131,13 @@
     sfml_pi_git_repo_ref: master
     attract_git_repo_url: https://github.com/mickelson/attract.git
     attract_git_repo_ref: master
+    raspberry_pi_cpu: cortex-a53  # Raspberry Pi 3
+    raspberry_pi_cflags: >-
+      -mcpu={{ raspberry_pi_cpu }}
+      -mtune={{ raspberry_pi_cpu }}
+      -mfloat-abi=hard
+      -mfpu=neon-fp-armv8
+      -mneon-for-64bits
 
   tasks:
 
