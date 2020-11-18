@@ -23,6 +23,8 @@
 # References:
 # - GCC compiler optimization for ARM-based systems
 #   https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
+# - Building SFML for Raspberry Pi without X11
+#   https://github.com/mickelson/sfml-pi/blob/master/readme.md
 #
 
 # PHASE 1: Prepare chroot environment
@@ -171,19 +173,28 @@
       - libuv1-dev
       # For SFML
       - cmake
+      - libdrm-dev
+      - libegl1-mesa-dev
       - libflac-dev
+      - libfreetype6-dev
+      - libgbm-dev
+      - libjpeg62-turbo-dev
       - libogg-dev
       - libopenal-dev
-      - libraspberrypi-dev
       - libudev-dev
       - libvorbis-dev
       # For Attract-Mode
+      - cmake
       - libarchive-dev
       - libavcodec-dev
       - libavformat-dev
       - libavresample-dev
       - libcurl4-openssl-dev
+      - libdrm-dev
       - libfontconfig1-dev
+      - libfreetype6-dev
+      - libgbm-dev
+      - libglu1-mesa-dev
       - libjpeg62-turbo-dev
       - libopenal-dev
       - libswresample-dev
@@ -345,11 +356,7 @@
       chdir: "{{ git_base_dir }}/sfml-pi"
       argv:
         - "/usr/bin/cmake"
-        - "-DSFML_RPI=1"
-        - "-DEGL_INCLUDE_DIR=/opt/vc/include"
-        - "-DEGL_LIBRARY=/opt/vc/lib/libbrcmEGL.so"
-        - "-DGLES_INCLUDE_DIR=/opt/vc/include"
-        - "-DGLES_LIBRARY=/opt/vc/lib/libbrcmGLESv2.so"
+        - "-DSFML_DRM=1"
         - "."
 
   - name: Build SFML for the Raspberry Pi from git
@@ -377,14 +384,16 @@
       chdir: "{{ git_base_dir }}/attract"
       params:
         "--jobs": "{{ ansible_processor_vcpus }}"
-        USE_GLES: 1
+        USE_DRM: 1
+        USE_MMAL: 1
 
   - name: Install Attract-Mode as root
     make:
       chdir: "{{ git_base_dir }}/attract"
       target: install
       params:
-        USE_GLES: 1
+        USE_DRM: 1
+        USE_MMAL: 1
     become: yes
     become_user: root
 
