@@ -122,7 +122,7 @@
   vars:
     git_base_dir: "{{ ansible_user_dir }}/git"
     sdl_git_repo_url: https://github.com/SDL-mirror/SDL.git
-    sdl_git_repo_ref: release-2.0.10
+    sdl_git_repo_ref: release-2.0.12
     sdlttf_git_repo_url: https://github.com/SDL-mirror/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.0.15
     mame_git_repo_url: https://github.com/mbarnes/mame.git
@@ -154,6 +154,13 @@
       - build-essential
       # For SDL
       - automake
+      - libasound2-dev
+      - libdbus-1-dev
+      - libdrm-dev
+      - libfreetype6-dev
+      - libgbm-dev
+      - libgles2-mesa-dev
+      - libudev-dev
       # For MAME
       - libasound2-dev
       - libflac-dev
@@ -218,12 +225,21 @@
       argv:
       - "./configure"
       - "--host=armv7l-raspberry-linux-gnueabihf"
-      - "--disable-pulseaudio"
+      - "--disable-arm-simd"
       - "--disable-esd"
-      - "--disable-video-mir"
+      - "--disable-jack"
+      - "--disable-pulseaudio"
+      - "--disable-sndio"
+      - "--disable-video-opengl"
+      - "--disable-video-opengles1"
+      - "--disable-video-rpi"
+      - "--disable-video-vulkan"
       - "--disable-video-wayland"
       - "--disable-video-x11"
-      - "--disable-video-opengl"
+      - "--enable-alsa"
+      - "--enable-arm-neon"
+      - "--enable-video-kmsdrm"
+      - "--enable-video-opengles2"
 
   - name: Examine SDL_config.h
     stat:
@@ -243,6 +259,7 @@
     make:
       chdir: "{{ git_base_dir }}/SDL"
       params:
+        CFLAGS: "{{ raspberry_pi_cflags }}"
         "--jobs": "{{ ansible_processor_vcpus }}"
 
   - name: Install SDL as root
@@ -298,9 +315,8 @@
       params:
         "--jobs": "{{ ansible_processor_vcpus }}"
         NOWERROR: 1
-        TARGETOS: rpi
-        RASPBERRY_SYSROOT: /
-        RASPBERRY_SDK_PATH: /usr
+        TARGETOS: linux
+        ARCHOPTS: "{{ raspberry_pi_cflags }}"
         USE_SYSTEM_LIB_EXPAT: 1
         USE_SYSTEM_LIB_ZLIB: 1
         USE_SYSTEM_LIB_JPEG: 1
@@ -426,6 +442,7 @@
         - tmux
         - vim
         # For MAME
+        - libgles2
         - libuv1
         # For Attract-Mode
         - libarchive13
