@@ -405,6 +405,14 @@
       - {regexp: '^#?hdmi_group=', line: "hdmi_group=2"}
       - {regexp: '^#?hdmi_mode=',  line: "hdmi_mode=16"}
 
+    - name: Enable Fake Kernel Mode Setting (FKMS) driver
+      ini_file:
+        path: /boot/config.txt
+        section: all
+        option: dtoverlay
+        value: vc4-fkms-v3d
+        no_extra_spaces: yes
+
     - name: Install required packages
       package:
         name:
