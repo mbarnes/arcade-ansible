@@ -397,6 +397,7 @@
     - name: Install required packages
       package:
         name:
+        - linux-cpupower
         - tmux
         - vim
         - xinit
@@ -408,6 +409,9 @@
         - libopenal1
         - libswscale5
         state: present
+
+    - name: Set CPU frequency govenor to "performance"
+      command: cpupower frequency-set --governor performance
 
     - name: Allow anybody to run the X server
       lineinfile:
