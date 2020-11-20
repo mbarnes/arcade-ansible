@@ -413,6 +413,12 @@
         value: vc4-fkms-v3d
         no_extra_spaces: yes
 
+    - name: Add user to "render" group
+      user:
+        name: "{{ ansible_ssh_user }}"
+        groups: render
+        append: yes
+
     - name: Install required packages
       package:
         name:
