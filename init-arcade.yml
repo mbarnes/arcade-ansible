@@ -128,7 +128,7 @@
     sdlttf_git_repo_url: https://github.com/SDL-mirror/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.0.15
     mame_git_repo_url: https://github.com/mbarnes/mame.git
-    mame_git_repo_ref: subtarget-cocktail-0172
+    mame_git_repo_ref: subtarget-cocktail-0226
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
     sfml_pi_git_repo_ref: master
     attract_git_repo_url: https://github.com/mickelson/attract.git
@@ -164,13 +164,19 @@
       - libgles2-mesa-dev
       - libudev-dev
       # For MAME
+      - libasio-dev
       - libasound2-dev
       - libflac-dev
       - libfontconfig1-dev
+      - libgles2-mesa-dev
+      - libglm-dev
+      - libglvnd-dev
       - libjpeg62-turbo-dev
-      - libraspberrypi-dev
+      - libpugixml-dev
       - libsqlite3-dev
-      - libuv1-dev
+      - libutf8proc-dev
+      - libxi-dev
+      - rapidjson-dev
       # For SFML
       - cmake
       - libdrm-dev
@@ -325,15 +331,22 @@
       chdir: "{{ git_base_dir }}/mame"
       params:
         "--jobs": "{{ ansible_processor_vcpus }}"
+        REGENIE: 1
         NOWERROR: 1
+        IGNORE_GIT: 1
         TARGETOS: linux
         ARCHOPTS: "{{ raspberry_pi_cflags }}"
+        NO_USE_XINPUT: 1
+        USE_SYSTEM_LIB_ASIO: 1
         USE_SYSTEM_LIB_EXPAT: 1
         USE_SYSTEM_LIB_ZLIB: 1
         USE_SYSTEM_LIB_JPEG: 1
         USE_SYSTEM_LIB_FLAC: 1
         USE_SYSTEM_LIB_SQLITE3: 1
-        USE_SYSTEM_LIB_UV: 1
+        USE_SYSTEM_LIB_UTF8PROC: 1
+        USE_SYSTEM_LIB_GLM: 1
+        USE_SYSTEM_LIB_RAPIDJSON: 1
+        USE_SYSTEM_LIB_PUGIXML: 1
 
   - name: Install MAME binary
     copy:
@@ -452,13 +465,22 @@
         - vim
         # For MAME
         - libgles2
-        - libuv1
+        - libpugixml1v5
+        - libutf8proc2
         # For Attract-Mode
         - libarchive13
         - libavformat58
         - libopenal1
         - libswscale5
         state: present
+
+    # This task is for removing obsolete dependency
+    # packages from previously installed MAME builds.
+    - name: Remove obsolete packages
+      package:
+        name:
+        - libuv1
+        state: absent
 
     - name: Set CPU frequency govenor to "performance"
       command: cpupower frequency-set --governor performance
@@ -486,6 +508,7 @@
     - mame
     - mame/auxroms
     - mame/cfg
+    - mame/dats
     - mame/flyers
     - mame/hi
     - mame/roms
