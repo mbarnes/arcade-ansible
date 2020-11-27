@@ -47,7 +47,7 @@
     fail:
       msg: "Variable {{ item }} is not defined"
     when: item is undefined
-    with_items:
+    loop:
     - cli_image_file
     - cli_chroot_path
 
@@ -81,25 +81,25 @@
   - name: Check for mount points in chroot directory
     stat:
       path: "{{ cli_chroot_path }}/{{ item }}"
-    with_items: "{{ bind_mounts }}"
+    loop: "{{ bind_mounts }}"
     register: mount_point_stat
 
   - name: Validate mount points in chroot directory
     fail:
       msg: "Missing mount point: {{ cli_chroot_path }}/{{ item.item }}"
     when: not (item.stat.exists and item.stat.isdir)
-    with_items: "{{ mount_point_stat.results }}"
+    loop: "{{ mount_point_stat.results }}"
 
   - name: Find existing bind mounts in chroot directory
     command: "findmnt --mountpoint {{ cli_chroot_path }}/{{ item }}"
     register: bind_mount_status
     ignore_errors: yes
-    with_items: "{{ bind_mounts }}"
+    loop: "{{ bind_mounts }}"
 
   - name: Create missing bind mounts in chroot directory
     command: "mount --bind /{{ item.item }} {{ cli_chroot_path }}/{{ item.item }}"
     when: item.rc == 1
-    with_items: "{{ bind_mount_status.results }}"
+    loop: "{{ bind_mount_status.results }}"
     args:
       warn: false
 
@@ -436,7 +436,7 @@
         path: /boot/config.txt
         regexp: "{{ item.regexp }}"
         line: "{{ item.line }}"
-      with_items:
+      loop:
       # Necessary for my VGA arcade monitor (needs HDMI adapter)
       - {regexp: '^#?hdmi_force_hotplug=', line: "hdmi_force_hotplug=1"}
       # hdmi_group: DMT / hdmi_mode: 1024x768 60 Hz
@@ -504,7 +504,7 @@
     file:
       path: "{{ ansible_user_dir }}/{{ item }}"
       state: directory
-    with_items:
+    loop:
     - mame
     - mame/auxroms
     - mame/cfg
