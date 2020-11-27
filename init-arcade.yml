@@ -415,6 +415,9 @@
 - hosts: arcade_group
   remote_user: pi
 
+  vars:
+  - mame_ini_dir: "{{ ansible_user_dir }}/.mame"
+
   tasks:
 
   - name: System-level tasks
@@ -520,6 +523,43 @@
     synchronize:
       src: home/
       dest: "{{ ansible_user_dir }}"
+
+  - name: Generate default mame configuration
+    command: /usr/local/bin/mamecocktail -createconfig
+    args:
+      chdir: "{{ mame_ini_dir }}"
+
+  - name: Customize mame configuration (mame.ini)
+    lineinfile:
+      path: "{{ mame_ini_dir }}/mame.ini"
+      regexp: "^({{ item.key }}\\s+)"
+      line: "\\g<1>{{ item.value }}"
+      backrefs: yes
+    loop:
+    - key: autorol
+      value: 1
+    - key: rompath
+      value: roms;auxroms
+    # TODO Test reverting the samplerate
+    #      override for a Raspberry Pi 4.
+    - key: samplerate
+      value: 22050
+    - key: skip_gameinfo
+      value: 1
+    - key: video
+      value: accel
+    - key: waitvsync
+      value: 1
+
+  - name: Customize mame configuration (plugin.ini)
+    lineinfile:
+      path: "{{ mame_ini_dir }}/plugin.ini"
+      regexp: "^({{ item.key }}\\s+)"
+      line: "\\g<1>{{ item.value }}"
+      backrefs: yes
+    loop:
+    - key: hiscore
+      value: 1
 
   - name: Generate romlist for mame (first time only)
     command: /usr/local/bin/attract --build-romlist mame
