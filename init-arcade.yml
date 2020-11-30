@@ -456,6 +456,19 @@
 
   vars:
   - mame_ini_dir: "{{ ansible_user_dir }}/.mame"
+  - config_txt_changes:
+    # Necessary for my VGA arcade monitor (needs HDMI adapter)
+    - option: hdmi_force_hotplug
+      value: 1
+    # hdmi_group: DMT / hdmi_mode: 1024x768 60 Hz
+    - option: hdmi_group
+      value: 2
+    - option: hdmi_mode
+      value: 16
+    # Enable Fake Kernel Mode Setting (FKMS) driver
+    - section: all
+      option: dtoverlay
+      value: vc4-fkms-v3d
 
   tasks:
 
@@ -473,25 +486,25 @@
         regexp: '^127\.0\.1\.1'
         line: "127.0.1.1\t{{ inventory_hostname }}"
 
-    - name: Configure HDMI parameters
+    - name: Uncomment select Raspberry Pi options
       lineinfile:
         path: /boot/config.txt
-        regexp: "{{ item.regexp }}"
-        line: "{{ item.line }}"
+        regexp: '^#({{ item }}=.*)'
+        line: "\\g<1>"
+        backrefs: yes
       loop:
-      # Necessary for my VGA arcade monitor (needs HDMI adapter)
-      - {regexp: '^#?hdmi_force_hotplug=', line: "hdmi_force_hotplug=1"}
-      # hdmi_group: DMT / hdmi_mode: 1024x768 60 Hz
-      - {regexp: '^#?hdmi_group=', line: "hdmi_group=2"}
-      - {regexp: '^#?hdmi_mode=',  line: "hdmi_mode=16"}
+      - hdmi_force_hotplug
+      - hdmi_group
+      - hdmi_mode
 
-    - name: Enable Fake Kernel Mode Setting (FKMS) driver
+    - name: Configure Raspberry Pi options
       ini_file:
         path: /boot/config.txt
-        section: all
-        option: dtoverlay
-        value: vc4-fkms-v3d
+        section: "{{ item.section | default(None) }}"
+        option: "{{ item.option }}"
+        value: "{{ item.value }}"
         no_extra_spaces: yes
+      loop: "{{ config_txt_changes }}"
 
     - name: Add user to "render" group
       user:
