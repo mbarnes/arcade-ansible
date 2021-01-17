@@ -465,6 +465,9 @@
       value: 2
     - option: hdmi_mode
       value: 16
+    # Disable rainbow splash screen on boot
+    - option: disable_splash
+      value: 1
     # Enable Fake Kernel Mode Setting (FKMS) driver
     - section: all
       option: dtoverlay
