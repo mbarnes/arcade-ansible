@@ -129,6 +129,8 @@
     sdlttf_git_repo_ref: release-2.0.15
     mame_git_repo_url: https://github.com/mbarnes/mame.git
     mame_git_repo_ref: subtarget-cocktail-0230
+    cmake_git_repo_url: https://gitlab.kitware.com/cmake/cmake.git
+    cmake_git_repo_ref: v3.16.3  # same as cmake .deb package
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
     sfml_pi_git_repo_ref: master
     attract_git_repo_url: https://github.com/mickelson/attract.git
@@ -179,7 +181,6 @@
       - libxi-dev
       - rapidjson-dev
       # For SFML
-      - cmake
       - libdrm-dev
       - libegl1-mesa-dev
       - libflac-dev
@@ -191,7 +192,6 @@
       - libudev-dev
       - libvorbis-dev
       # For Attract-Mode
-      - cmake
       - libarchive-dev
       - libavcodec-dev
       - libavformat-dev
@@ -397,6 +397,39 @@
     become: yes
     become_user: root
 
+  # XXX The packaged cmake is not configured with _FILE_OFFSET_BITS=64,
+  #     and causes all manner of problems in this emulated environment.
+  #     Build the same version as the package but with the correction.
+  - name: Clone cmake from git
+    git:
+      repo: "{{ cmake_git_repo_url }}"
+      dest: "{{ git_base_dir }}/cmake"
+      version: "{{ cmake_git_repo_ref }}"
+      depth: 1
+
+  - name: Bootstrap cmake with Large File Support (LFS)
+    command:
+      chdir: "{{ git_base_dir }}/cmake"
+      argv:
+      - "./bootstrap"
+      - "--parallel={{ ansible_processor_vcpus }}"
+      - "--system-curl"
+    environment:
+      CXXFLAGS: "-D_FILE_OFFSET_BITS=64"
+
+  - name: Build cmake from git
+    make:
+      chdir: "{{ git_base_dir }}/cmake"
+      params:
+        "--jobs": "{{ ansible_processor_vcpus }}"
+
+  - name: Install cmake as root
+    make:
+      chdir: "{{ git_base_dir }}/cmake"
+      target: install
+    become: yes
+    become_user: root
+
   - name: Clone SFML for the Raspberry Pi from git
     git:
       repo: "{{ sfml_pi_git_repo_url }}"
@@ -408,7 +441,7 @@
     command:
       chdir: "{{ git_base_dir }}/sfml-pi"
       argv:
-        - "/usr/bin/cmake"
+        - "cmake"
         - "-DSFML_DRM=1"
         - "."
 
