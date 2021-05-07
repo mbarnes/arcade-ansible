@@ -550,6 +550,14 @@
         groups: render
         append: yes
 
+    - name: Create /etc/asound.conf
+      copy:
+        content: |
+          # Default to bcm2835 Headphones card
+          defaults.pcm.card 1
+          defaults.ctl.card 1
+        dest: /etc/asound.conf
+
     - name: Install required packages
       package:
         name:
