@@ -591,6 +591,7 @@
     - name: Install required packages
       package:
         name:
+        - fbi
         - linux-cpupower
         - tmux
         - vim
@@ -617,6 +618,17 @@
 
     - name: Set CPU frequency govenor to "performance"
       command: cpupower frequency-set --governor performance
+
+    - name: Display a splash screen during boot
+      copy:
+        src: splashscreen.service
+        dest: /etc/systemd/system/splashscreen.service
+
+    - name: Enable the splash screen service
+      systemd:
+        name: splashscreen.service
+        enabled: yes
+        daemon_reload: yes
 
     - name: Configure systemd to launch Attract-Mode
       copy:
