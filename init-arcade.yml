@@ -491,6 +491,28 @@
 
   vars:
   - mame_ini_dir: "{{ ansible_user_dir }}/.mame"
+  - boot_cmdline:
+    # Kernel parameter documentation:
+    # https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/kernel-parameters.txt
+    # Common Raspberry Pi kernel parameters:
+    # https://www.raspberrypi.org/documentation/configuration/cmdline-txt.md
+    - console=serial0,115200
+    - console=tty3
+    - root=/dev/mmcblk0p2
+    - rootfstype=ext4
+    - elevator=deadline
+    - fsck.repair=yes
+    - rootwait
+    - quiet
+    # Disable Raspberry Pi logo
+    - logo.nologo
+    # Remove cursor on virtual terminals
+    - vt.global_cursor_default=0
+    # Rotate the HDMI 1 display 90 degrees
+    # Resolution agrees with hdmi_mode below.
+    - video=HDMI-A-1:1024x768M@60,rotate=90
+    # Disable console blank timer
+    - consoleblank=0
   - config_txt_changes:
     # Necessary for my VGA arcade monitor (needs HDMI adapter)
     - option: hdmi_force_hotplug
@@ -523,6 +545,14 @@
         path: /etc/hosts
         regexp: '^127\.0\.1\.1'
         line: "127.0.1.1\t{{ inventory_hostname }}"
+
+    - name: Configure kernel parameters
+      copy:
+        content: "{{ boot_cmdline | join(' ') }}"
+        dest: /boot/cmdline.txt
+        mode: '0755'
+        owner: root
+        group: root
 
     - name: Uncomment select Raspberry Pi options
       lineinfile:
