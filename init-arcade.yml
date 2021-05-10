@@ -691,6 +691,8 @@
       value: roms;auxroms
     - key: skip_gameinfo
       value: 1
+    - key: skip_warnings
+      value: 1
     - key: video
       value: accel
     - key: waitvsync
