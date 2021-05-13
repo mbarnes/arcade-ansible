@@ -591,6 +591,7 @@
     - name: Install required packages
       package:
         name:
+        - console-tools
         - fbi
         - linux-cpupower
         - tmux
@@ -629,6 +630,21 @@
         name: splashscreen.service
         enabled: yes
         daemon_reload: yes
+
+    # This specifically targets Alt-Left and Alt-Right bindings,
+    # which can easily get triggered during game play and switch
+    # the active VT away from the splash screen.  This change is
+    # transient, so it runs as a boot-time crontab entry.
+    - name: Disable key bindings with a boot-time crontab entry
+      cron:
+        name: Disable key bindings that can be triggered during game play
+        user: root
+        cron_file: /etc/crontab
+        special_time: reboot
+        job: >
+          dumpkeys --keys-only |
+          grep --extended-regexp --invert-match "(Incr|Decr)_Console" |
+          loadkeys
 
     - name: Configure systemd to launch Attract-Mode
       copy:
