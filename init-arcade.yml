@@ -715,6 +715,8 @@
       value: 1
     - key: skip_warnings
       value: 1
+    - key: unevenstretch
+      value: 0
     - key: video
       value: accel
     - key: waitvsync
