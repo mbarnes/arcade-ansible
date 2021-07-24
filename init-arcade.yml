@@ -367,40 +367,12 @@
     become: yes
     become_user: root
 
-  # FIXME The copy module's remote_src supports recursive copying
-  #       as of Ansible 2.8.  In the meantime, use the cp command.
-
-  # FIXME This can be removed for Ansible 2.8.
-  - name: Create MAME directory as root
-    file:
-      path: /usr/local/games/mame
-      state: directory
-      mode: u=rwx,g=rx,o=rx
-      owner: root
-      group: root
-    become: yes
-    become_user: root
-
-  # FIXME Use the copy module for Ansible 2.8.
   - name: Install MAME plugins as root
-    command: "cp --recursive {{ git_base_dir }}/mame/plugins /usr/local/games/mame"
-    #copy:
-    #  src: "{{ git_base_dir }}/mame/plugins"
-    #  dest: /usr/local/games/mame
-    #  remote_src: yes
-    #  mode: preserve
-    become: yes
-    become_user: root
-
-  # FIXME This can be removed for Ansible 2.8.
-  - name: Set ownership of MAME plugins to root
-    file:
-      path: /usr/local/games/mame/plugins
-      state: directory
-      recurse: yes
-      mode: u=rwx,g=rx,o=rx
-      owner: root
-      group: root
+    copy:
+      src: "{{ git_base_dir }}/mame/plugins"
+      dest: /usr/local/games/mame
+      remote_src: yes
+      mode: preserve
     become: yes
     become_user: root
 
