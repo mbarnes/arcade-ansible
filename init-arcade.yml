@@ -683,6 +683,8 @@
       value: /usr/local/games/mame/plugins
     - key: rompath
       value: roms;auxroms
+    - key: samplerate
+      value: 44100
     - key: skip_gameinfo
       value: 1
     - key: skip_warnings
