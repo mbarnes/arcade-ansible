@@ -133,7 +133,7 @@
     sdlttf_git_repo_url: https://github.com/SDL-mirror/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.0.15
     mame_git_repo_url: https://github.com/mbarnes/mame.git
-    mame_git_repo_ref: subtarget-cocktail-0233
+    mame_git_repo_ref: subtarget-cocktail-0234
     cmake_git_repo_url: https://gitlab.kitware.com/cmake/cmake.git
     cmake_git_repo_ref: v3.16.3  # same as cmake .deb package
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
