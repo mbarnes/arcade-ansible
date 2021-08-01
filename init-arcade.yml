@@ -25,6 +25,8 @@
 #   https://gist.github.com/fm4dd/c663217935dc17f0fc73c9c81b0aa845
 # - Building SFML for Raspberry Pi without X11
 #   https://github.com/mickelson/sfml-pi/blob/master/readme.md
+# - Pac-Man Vector Art (source of splash screen artwork)
+#   https://www.classicgaming.cc/classics/pac-man/vector-art
 #
 
 # PHASE 1: Prepare chroot environment
