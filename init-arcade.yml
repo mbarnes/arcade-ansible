@@ -157,6 +157,16 @@
     meta: end_play
     when: cli_skip_build | default(false)
 
+  - name: Allow apt repository rename to "oldstable"
+    copy:
+      content: "Acquire::AllowReleaseInfoChange \"1\";"
+      dest: /etc/apt/apt.conf.d/99allowreleaseinfochange
+      mode: '0644'
+      owner: root
+      group: root
+    become: yes
+    become_user: root
+
   - name: Install build dependencies
     apt:
       # Allow duplicates here if multiple
