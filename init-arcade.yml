@@ -135,7 +135,7 @@
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
     sdlttf_git_repo_ref: main
     mame_git_repo_url: https://github.com/mbarnes/mame.git
-    mame_git_repo_ref: subtarget-cocktail-0236
+    mame_git_repo_ref: subtarget-cocktail-0237
     cmake_git_repo_url: https://gitlab.kitware.com/cmake/cmake.git
     cmake_git_repo_ref: v3.16.3  # same as cmake .deb package
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
@@ -663,6 +663,20 @@
 
     # End of block
 
+  # MAME 0.237 renamed the high score directory to "hiscore".
+  - name: Check for old high score directory
+    stat:
+      path: "{{ ansible_user_dir }}/mame/hi"
+    register: old_hiscore_dir
+
+  - name: Migrate old high score directory
+    command: "mv hi hiscore"
+    args:
+      chdir: "{{ ansible_user_dir }}/mame"
+    when:
+    - old_hiscore_dir.stat.isdir is defined
+    - old_hiscore_dir.stat.isdir
+
   - name: Create MAME directory structure
     file:
       path: "{{ ansible_user_dir }}/{{ item }}"
@@ -673,7 +687,7 @@
     - mame/cfg
     - mame/dats
     - mame/flyers
-    - mame/hi
+    - mame/hiscore
     - mame/roms
     - mame/samples
     - mame/snaps
