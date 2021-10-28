@@ -492,7 +492,7 @@
   remote_user: pi
 
   vars:
-  - mame_ini_dir: "{{ ansible_user_dir }}/.mame"
+  - mame_base_dir: "{{ ansible_user_dir }}/mame"
   - boot_cmdline:
     # Kernel parameter documentation:
     # https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/kernel-parameters.txt
@@ -666,51 +666,59 @@
   # MAME 0.237 renamed the high score directory to "hiscore".
   - name: Check for old high score directory
     stat:
-      path: "{{ ansible_user_dir }}/mame/hi"
+      path: "{{ mame_base_dir }}/hi"
     register: old_hiscore_dir
 
   - name: Migrate old high score directory
     command: "mv hi hiscore"
     args:
-      chdir: "{{ ansible_user_dir }}/mame"
+      chdir: "{{ mame_base_dir }}"
     when:
     - old_hiscore_dir.stat.isdir is defined
     - old_hiscore_dir.stat.isdir
 
+  - name: Check for old ini directory
+    stat:
+      path: "{{ ansible_user_dir }}/.mame"
+    register: old_mame_ini_dir
+
+  - name: Migrate old ini directory
+    command: "mv {{ ansible_user_dir }}/.mame ini"
+    args:
+      chdir: "{{ mame_base_dir }}"
+    when:
+    - old_mame_ini_dir.stat.isdir is defined
+    - old_mame_ini_dir.stat.isdir
+
   - name: Create MAME directory structure
     file:
-      path: "{{ ansible_user_dir }}/{{ item }}"
+      path: "{{ mame_base_dir }}/{{ item }}"
       state: directory
     loop:
-    - mame
-    - mame/auxroms
-    - mame/cfg
-    - mame/dats
-    - mame/flyers
-    - mame/hiscore
-    - mame/roms
-    - mame/samples
-    - mame/snaps
-    - mame/videos
+    - auxroms
+    - cfg
+    - dats
+    - flyers
+    - hiscore
+    - ini
+    - roms
+    - samples
+    - snaps
+    - videos
 
   - name: Synchronize home directory files
     synchronize:
       src: home/
       dest: "{{ ansible_user_dir }}"
 
-  - name: Create mame directory
-    file:
-      path: "{{ mame_ini_dir }}"
-      state: directory
-
   - name: Generate default mame configuration
     command: /usr/local/bin/mamecocktail -createconfig
     args:
-      chdir: "{{ mame_ini_dir }}"
+      chdir: "{{ mame_base_dir }}/ini"
 
   - name: Customize mame configuration (mame.ini)
     lineinfile:
-      path: "{{ mame_ini_dir }}/mame.ini"
+      path: "{{ mame_base_dir }}/ini/mame.ini"
       regexp: "^({{ item.key }}\\s+)"
       line: "\\g<1>{{ item.value }}"
       backrefs: yes
@@ -738,7 +746,7 @@
 
   - name: Customize mame configuration (plugin.ini)
     lineinfile:
-      path: "{{ mame_ini_dir }}/plugin.ini"
+      path: "{{ mame_base_dir }}/ini/plugin.ini"
       regexp: "^({{ item.key }}\\s+)"
       line: "\\g<1>{{ item.value }}"
       backrefs: yes
