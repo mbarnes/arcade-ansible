@@ -149,13 +149,16 @@
       -mtune={{ raspberry_pi_cpu }}
       -mfloat-abi=hard
       -mfpu=neon-fp-armv8
-      -mneon-for-64bits
 
   tasks:
 
   - name: Skip build if cli_skip_build requested
     meta: end_play
     when: cli_skip_build | default(false)
+
+  - name: Set virtual CPU count from localhost
+    set_fact:
+      ansible_processor_vcpus: "{{ hostvars['localhost']['ansible_facts']['processor_vcpus'] }}"
 
   - name: Install build dependencies
     apt:
@@ -164,7 +167,7 @@
       name:
       - git
       - build-essential
-      - python-apt
+      - python3-apt
       # For SDL
       - automake
       - libasound2-dev
