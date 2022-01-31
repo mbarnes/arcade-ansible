@@ -131,9 +131,9 @@
   vars:
     git_base_dir: "{{ ansible_user_dir }}/git"
     sdl_git_repo_url: https://github.com/libsdl-org/SDL.git
-    sdl_git_repo_ref: release-2.0.16
+    sdl_git_repo_ref: release-2.0.20
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
-    sdlttf_git_repo_ref: main
+    sdlttf_git_repo_ref: release-2.0.18
     mame_git_repo_url: https://github.com/mbarnes/mame.git
     mame_git_repo_ref: subtarget-cocktail-0240
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
