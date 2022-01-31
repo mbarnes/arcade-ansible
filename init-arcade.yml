@@ -309,7 +309,7 @@
       force: yes
 
   # XXX Upstream uses a newer automake version than what
-  #     Raspbian currently provides (1.16.3 vs 1.16.1),
+  #     Raspbian currently provides (1.16.5 vs 1.16.3),
   #     so this step avoids a version conflict.
   - name: Generate build files for SDL_ttf
     command:
