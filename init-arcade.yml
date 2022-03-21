@@ -713,6 +713,14 @@
     - key: hiscore
       value: 1
 
+  - name: Rotate any horizontal games (horizont.ini)
+    copy:
+      content: |
+        # Rotate for vertical monitor
+        rol 1
+      dest: "{{ mame_base_dir }}/ini/horizont.ini"
+      mode: '0644'
+
   - name: Generate romlist for mame (first time only)
     command: /usr/local/bin/attract --build-romlist mame
     args:
