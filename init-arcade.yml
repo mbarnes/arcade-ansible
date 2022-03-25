@@ -659,7 +659,8 @@
     - dats
     - flyers
     - hiscore
-    - ini
+    - ini/source
+    - nvram
     - roms
     - samples
     - snaps
@@ -669,6 +670,10 @@
     synchronize:
       src: home/
       dest: "{{ ansible_user_dir }}"
+      # Skip updating files that already exist on the destination
+      # because some games (Qix and Zoo Keeper) configure cocktail
+      # mode in nvram and we don't want to overwrite high scores.
+      rsync_opts: --ignore-existing
 
   - name: Generate default mame configuration
     command: /usr/local/bin/mamecocktail -createconfig
@@ -719,6 +724,15 @@
         # Rotate for vertical monitor
         rol 1
       dest: "{{ mame_base_dir }}/ini/horizont.ini"
+      mode: '0644'
+
+  - name: Customize qix driver (source/qix.ini)
+    copy:
+      content: |
+        # Flip screen for cocktail mode (set in nvram)
+        flipx 1
+        flipy 1
+      dest: "{{ mame_base_dir }}/ini/source/qix.ini"
       mode: '0644'
 
   - name: Generate romlist for mame (first time only)
