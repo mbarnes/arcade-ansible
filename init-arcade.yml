@@ -474,22 +474,17 @@
     - video=HDMI-A-1:1280x1024@60,rotate=90
     # Disable console blank timer
     - consoleblank=0
+  - config_txt_default: "https://raw.githubusercontent.com/RPi-Distro/pi-gen/master/stage1/00-boot-files/files/config.txt"
   - config_txt_changes:
-    # Necessary for my VGA arcade monitor (needs HDMI adapter)
-    - option: hdmi_force_hotplug
-      value: 1
     # hdmi_group: DMT / hdmi_mode: 1280x1024 60 Hz
     - option: hdmi_group
       value: 2
     - option: hdmi_mode
       value: 35
     # Disable rainbow splash screen on boot
-    - option: disable_splash
-      value: 1
-    # Enable Fake Kernel Mode Setting (FKMS) driver
     - section: all
-      option: dtoverlay
-      value: vc4-fkms-v3d
+      option: disable_splash
+      value: 1
 
   tasks:
 
@@ -515,6 +510,14 @@
         owner: root
         group: root
 
+    - name: Get default Raspberry Pi config
+      get_url:
+        url: "{{ config_txt_default }}"
+        dest: /boot/config.txt
+        mode: u=rwx,g=rx,o=rx
+        owner: root
+        group: root
+
     - name: Uncomment select Raspberry Pi options
       lineinfile:
         path: /boot/config.txt
@@ -522,11 +525,10 @@
         line: "\\g<1>"
         backrefs: yes
       loop:
-      - hdmi_force_hotplug
       - hdmi_group
       - hdmi_mode
 
-    - name: Configure Raspberry Pi options
+    - name: Tweak Raspberry Pi config
       ini_file:
         path: /boot/config.txt
         section: "{{ item.section | default(None) }}"
