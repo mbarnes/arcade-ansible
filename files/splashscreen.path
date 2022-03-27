@@ -1,0 +1,8 @@
+[Unit]
+Description=Splash screen for Raspberry Pi
+
+[Path]
+PathExists=/dev/fb0
+
+[Install]
+WantedBy=sysinit.target

@@ -585,12 +585,15 @@
 
     - name: Display a splash screen during boot
       copy:
-        src: splashscreen.service
-        dest: /etc/systemd/system/splashscreen.service
+        src: "{{ item }}"
+        dest: "/etc/systemd/system/{{ item }}"
+      loop:
+      - splashscreen.path
+      - splashscreen.service
 
-    - name: Enable the splash screen service
+    - name: Enable the splash screen path unit
       systemd:
-        name: splashscreen.service
+        name: splashscreen.path
         enabled: yes
         daemon_reload: yes
 
