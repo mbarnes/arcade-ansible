@@ -362,7 +362,7 @@
         TARGETOS: linux
         ARCHOPTS: "{{ raspberry_pi_cflags }}"
         NO_USE_XINPUT: 1
-        USE_SYSTEM_LIB_ASIO: 1
+        USE_SYSTEM_LIB_ASIO: 0
         USE_SYSTEM_LIB_EXPAT: 1
         USE_SYSTEM_LIB_ZLIB: 1
         USE_SYSTEM_LIB_JPEG: 1
