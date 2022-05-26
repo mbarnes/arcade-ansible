@@ -357,6 +357,7 @@
         "--jobs": "{{ ansible_processor_vcpus }}"
         REGENIE: 1
         NOWERROR: 1
+        NO_OPENGL: 1
         IGNORE_GIT: 1
         TARGETOS: linux
         ARCHOPTS: "{{ raspberry_pi_cflags }}"
