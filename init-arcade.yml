@@ -703,6 +703,8 @@
       value: 0
     - key: video
       value: accel
+    - key: videodriver
+      value: kmsdrm
     - key: waitvsync
       value: 1
 
