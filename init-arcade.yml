@@ -652,7 +652,6 @@
       path: "{{ mame_base_dir }}/{{ item }}"
       state: directory
     loop:
-    - auxroms
     - cfg
     - dats
     - flyers
@@ -692,7 +691,7 @@
     - key: pluginspath
       value: /usr/local/games/mame/plugins
     - key: rompath
-      value: roms;auxroms
+      value: roms
     - key: samplerate
       value: 44100
     - key: skip_gameinfo
