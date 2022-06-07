@@ -721,12 +721,22 @@
     - key: hiscore
       value: 1
 
-  - name: Rotate any horizontal games (horizont.ini)
+  - name: Customize horizontal games (horizont.ini)
     copy:
       content: |
         # Rotate for vertical monitor
         rol 1
+        # This distorts the aspect ratio but fills the vertical monitor
+        keepaspect 0
       dest: "{{ mame_base_dir }}/ini/horizont.ini"
+      mode: '0644'
+
+  - name: Customize Capcom Bowling (capbowl.ini)
+    copy:
+      content: |
+        # This distorts the aspect ratio but fills the vertical monitor
+        keepaspect 0
+      dest: "{{ mame_base_dir }}/ini/capbowl.ini"
       mode: '0644'
 
   - name: Customize qix driver (source/qix.ini)
