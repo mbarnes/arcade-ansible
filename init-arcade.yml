@@ -688,6 +688,8 @@
       value: 1
     - key: autostretchxy
       value: 1
+    - key: dial_device
+      value: mouse
     - key: pluginspath
       value: /usr/local/games/mame/plugins
     - key: rompath
@@ -698,6 +700,8 @@
       value: 1
     - key: skip_warnings
       value: 1
+    - key: trackball_device
+      value: mouse
     - key: unevenstretch
       value: 0
     - key: video
