@@ -133,7 +133,7 @@
     sdl_git_repo_url: https://github.com/libsdl-org/SDL.git
     sdl_git_repo_ref: release-2.0.22
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
-    sdlttf_git_repo_ref: release-2.0.18
+    sdlttf_git_repo_ref: release-2.20.0
     mame_git_repo_url: https://github.com/mbarnes/mame.git
     mame_git_repo_ref: subtarget-cocktail-0246
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
