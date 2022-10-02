@@ -135,7 +135,7 @@
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.20.1
     mame_git_repo_url: https://github.com/mbarnes/mame.git
-    mame_git_repo_ref: subtarget-cocktail-0247
+    mame_git_repo_ref: subtarget-cocktail-0248
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
     sfml_pi_git_repo_ref: master
     attract_git_repo_url: https://github.com/mickelson/attract.git
