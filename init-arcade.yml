@@ -131,7 +131,7 @@
   vars:
     git_base_dir: "{{ ansible_user_dir }}/git"
     sdl_git_repo_url: https://github.com/libsdl-org/SDL.git
-    sdl_git_repo_ref: release-2.24.1
+    sdl_git_repo_ref: release-2.26.0
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.20.1
     mame_git_repo_url: https://github.com/mbarnes/mame.git
