@@ -750,6 +750,18 @@
       dest: "{{ mame_base_dir }}/ini/source/qix.ini"
       mode: '0644'
 
+  - name: Verify ROM sets
+    command: /usr/local/bin/mamecocktail -verifyroms
+    args:
+      chdir: "{{ mame_base_dir }}"
+    changed_when: False
+
+  - name: Verify sample sets
+    command: /usr/local/bin/mamecocktail -verifysamples
+    args:
+      chdir: "{{ mame_base_dir }}"
+    changed_when: False
+
   - name: Generate romlist for mame (first time only)
     command: /usr/local/bin/attract --build-romlist mame
     args:
