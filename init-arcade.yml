@@ -669,9 +669,14 @@
     synchronize:
       src: home/
       dest: "{{ ansible_user_dir }}"
-      # Skip updating files that already exist on the destination
-      # because some games (Qix and Zoo Keeper) configure cocktail
-      # mode in nvram and we don't want to overwrite high scores.
+
+  # Skip updating files that already exist on the destination
+  # because some games (Qix and Zoo Keeper) configure cocktail
+  # mode in nvram and we don't want to overwrite high scores.
+  - name: Syncronize home directory files without overwriting
+    synchronize:
+      src: home-no-overwrite/
+      dest: "{{ ansible_user_dir }}"
       rsync_opts: --ignore-existing
 
   - name: Generate default mame configuration
