@@ -107,8 +107,6 @@
     command: "mount --bind /{{ item.item }} {{ cli_chroot_path }}/{{ item.item }}"
     when: item.rc == 1
     loop: "{{ bind_mount_status.results }}"
-    args:
-      warn: false
 
   - name: Comment out ld.so.preload in chroot directory
     replace:
@@ -597,7 +595,7 @@
       cron:
         name: Disable key bindings that can be triggered during game play
         user: root
-        cron_file: /etc/crontab
+        cron_file: keybindings
         special_time: reboot
         job: >
           dumpkeys --keys-only |
