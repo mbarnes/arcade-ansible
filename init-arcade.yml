@@ -451,6 +451,7 @@
   remote_user: pi
 
   vars:
+  - journal_max_disk_usage: 128M
   - mame_base_dir: "{{ ansible_user_dir }}/mame"
   - boot_cmdline:
     # Kernel parameter documentation:
@@ -486,6 +487,14 @@
       option: disable_splash
       value: 1
 
+  handlers:
+
+  - name: Restart journald
+    systemd:
+      name: systemd-journald.service
+      state: restarted
+    become: yes
+
   tasks:
 
   - name: System-level tasks
@@ -501,6 +510,13 @@
         path: /etc/hosts
         regexp: '^127\.0\.1\.1'
         line: "127.0.1.1\t{{ inventory_hostname }}"
+
+    - name: Limit journal disk usage
+      lineinfile:
+        path: /etc/systemd/journald.conf
+        regexp: "^#?SystemMaxUse="
+        line: "SystemMaxUse={{ journal_max_disk_usage }}"
+      notify: Restart journald
 
     - name: Configure kernel parameters
       copy:
