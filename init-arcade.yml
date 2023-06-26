@@ -564,7 +564,6 @@
         name:
         - console-tools
         - fbi
-        - linux-cpupower
         - tmux
         - vim
         # For MAME
@@ -587,9 +586,6 @@
         name:
         - libuv1
         state: absent
-
-    - name: Set CPU frequency govenor to "performance"
-      command: cpupower frequency-set --governor performance
 
     - name: Display a splash screen during boot
       copy:
