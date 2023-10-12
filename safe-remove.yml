@@ -50,8 +50,6 @@
     command: "umount {{ cli_chroot_path }}/{{ item.item }}"
     when: item.rc == 0
     with_items: "{{ bind_mount_status.results }}"
-    args:
-      warn: false
 
   - name: Remove chroot directory
     file:
