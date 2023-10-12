@@ -37,6 +37,7 @@
     - proc
     - sys
     - dev
+    - dev/pts
 
   tasks:
 

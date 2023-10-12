@@ -16,6 +16,7 @@
     bind_mounts:
     - proc
     - sys
+    - dev/pts
     - dev
 
   tasks:
