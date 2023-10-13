@@ -574,10 +574,10 @@
         - libutf8proc2
         # For Attract-Mode
         - libarchive13
-        - libavformat58
+        - libavformat59
         - libgbm1
         - libopenal1
-        - libswscale5
+        - libswscale6
         state: present
 
     # This task is for removing obsolete dependency
