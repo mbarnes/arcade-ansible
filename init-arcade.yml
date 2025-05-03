@@ -115,6 +115,19 @@
       regexp: '^(/.+)$'
       replace: '#\1'
 
+  # In case mkinitramfs should happen to run during post-installation
+  # of build dependencies, avoid the following error:
+  #
+  #   mkinitramfs: failed to determine device for /
+  #   mkinitramfs: workaround is MODULES=most, check:
+  #   grep -r MODULES /etc/initramfs-tools
+  #
+  - name: Avoid potential mkinitramfs failure
+    replace:
+      path: "{{ cli_chroot_path }}/etc/initramfs-tools/initramfs.conf"
+      regexp: '^MODULES=dep'
+      replace: 'MODULES=most'
+
   - name: Add chroot path to inventory for next play
     add_host:
       name: "{{ cli_chroot_path }}"
