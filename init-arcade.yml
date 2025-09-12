@@ -166,7 +166,7 @@
 
   - name: Skip build if cli_skip_build requested
     meta: end_play
-    when: cli_skip_build | default(false)
+    when: cli_skip_build | default(false) | bool
 
   - name: Set virtual CPU count from localhost
     set_fact:
@@ -466,9 +466,9 @@
   remote_user: pi
 
   vars:
-  - journal_max_disk_usage: 128M
-  - mame_base_dir: "{{ ansible_user_dir }}/mame"
-  - boot_cmdline:
+    journal_max_disk_usage: 128M
+    mame_base_dir: "{{ ansible_user_dir }}/mame"
+    boot_cmdline:
     # Kernel parameter documentation:
     # https://github.com/torvalds/linux/blob/master/Documentation/admin-guide/kernel-parameters.txt
     # Common Raspberry Pi kernel parameters:
@@ -490,8 +490,8 @@
     - video=HDMI-A-1:1280x1024@60,rotate=90
     # Disable console blank timer
     - consoleblank=0
-  - config_txt_default: "https://raw.githubusercontent.com/RPi-Distro/pi-gen/master/stage1/00-boot-files/files/config.txt"
-  - config_txt_changes:
+    config_txt_default: "https://raw.githubusercontent.com/RPi-Distro/pi-gen/master/stage1/00-boot-files/files/config.txt"
+    config_txt_changes:
     # hdmi_group: DMT / hdmi_mode: 1280x1024 60 Hz
     - option: hdmi_group
       value: 2
