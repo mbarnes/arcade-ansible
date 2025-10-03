@@ -109,11 +109,17 @@
     when: item.rc == 1
     loop: "{{ bind_mount_status.results }}"
 
-  - name: Comment out ld.so.preload in chroot directory
-    replace:
+  - name: Check for /etc/ld.so.preload in chroot directory
+    stat:
       path: "{{ cli_chroot_path }}/etc/ld.so.preload"
+    register: ld_so_preload
+
+  - name: Comment out /etc/ld.so.preload in chroot directory
+    replace:
+      path: "{{ ld_so_preload.stat.path }}"
       regexp: '^(/.+)$'
       replace: '#\1'
+    when: ld_so_preload.stat.exists
 
   # In case mkinitramfs should happen to run during post-installation
   # of build dependencies, avoid the following error:
