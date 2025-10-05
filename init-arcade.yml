@@ -156,10 +156,8 @@
     mame_git_repo_ref: subtarget-cocktail-0281
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
     sfml_pi_git_repo_ref: master
-    #attract_git_repo_url: https://github.com/mickelson/attract.git
-    #attract_git_repo_ref: v2.7.0
-    attract_git_repo_url: https://github.com/mbarnes/attract.git
-    attract_git_repo_ref: mouse-menu-navigation
+    attract_git_repo_url: https://github.com/mickelson/attract.git
+    attract_git_repo_ref: master
     #raspberry_pi_cpu: cortex-a53  # Raspberry Pi 3
     raspberry_pi_cpu: cortex-a72  # Raspberry Pi 4
     raspberry_pi_cflags: >-
