@@ -2,7 +2,7 @@
 ---
 #
 # Builds software for a Raspberry Pi based arcade machine in a
-# qemu-arm-static chroot environment.
+# qemu-aarch64 chroot environment.
 #
 # Cross-compilation is faster and helps extend the life of the
 # Raspberry Pi's SD card.
@@ -70,17 +70,17 @@
       dest: "{{ cli_chroot_path }}/etc/resolv.conf"
       mode: preserve
 
-  - name: Copy qemu-arm-static into chroot directory
+  - name: Copy qemu-aarch64 into chroot directory
     copy:
-      src: /usr/bin/qemu-arm-static
-      dest: "{{ cli_chroot_path }}/bin/qemu-arm-static"
+      src: /usr/bin/qemu-aarch64
+      dest: "{{ cli_chroot_path }}/bin/qemu-aarch64"
       mode: preserve
 
   - name: Create a mock shell for Ansible's chroot plugin
     copy:
       content: |
         #!/bin/sh
-        /bin/qemu-arm-static /bin/sh "$@"
+        /bin/qemu-aarch64 /bin/sh "$@"
       dest: "{{ cli_chroot_path }}/bin/qemu-sh"
       mode: '0755'
       owner: root
@@ -270,7 +270,8 @@
       chdir: "{{ git_base_dir }}/SDL"
       argv:
       - "./configure"
-      - "--host=armv7l-raspberry-linux-gnueabihf"
+      - "--host={{ ansible_architecture }}-linux-gnu"
+      - "--disable-arm-neon"
       - "--disable-arm-simd"
       - "--disable-esd"
       - "--disable-jack"
@@ -283,7 +284,6 @@
       - "--disable-video-wayland"
       - "--disable-video-x11"
       - "--enable-alsa"
-      - "--enable-arm-neon"
       - "--enable-video-kmsdrm"
       - "--enable-video-opengles2"
 
