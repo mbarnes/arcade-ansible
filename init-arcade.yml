@@ -540,7 +540,7 @@
     - name: Configure kernel parameters
       copy:
         content: "{{ boot_cmdline | join(' ') }}"
-        dest: /boot/cmdline.txt
+        dest: /boot/firmware/cmdline.txt
         mode: '0755'
         owner: root
         group: root
@@ -548,14 +548,14 @@
     - name: Get default Raspberry Pi config
       get_url:
         url: "{{ config_txt_default }}"
-        dest: /boot/config.txt
+        dest: /boot/firmware/config.txt
         mode: u=rwx,g=rx,o=rx
         owner: root
         group: root
 
     - name: Uncomment select Raspberry Pi options
       lineinfile:
-        path: /boot/config.txt
+        path: /boot/firmware/config.txt
         regexp: '^#({{ item }}=.*)'
         line: "\\g<1>"
         backrefs: yes
@@ -565,7 +565,7 @@
 
     - name: Tweak Raspberry Pi config
       ini_file:
-        path: /boot/config.txt
+        path: /boot/firmware/config.txt
         section: "{{ item.section | default(None) }}"
         option: "{{ item.option }}"
         value: "{{ item.value }}"
