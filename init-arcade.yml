@@ -464,8 +464,6 @@
 
 # PHASE 3: Configure Raspberry Pi hosts
 - hosts: arcade_group
-  remote_user: pi
-
   vars:
     journal_max_disk_usage: 128M
     mame_base_dir: "{{ ansible_user_dir }}/mame"
@@ -606,6 +604,11 @@
         - libuv1
         state: absent
 
+    - name: Copy splash screen image to /boot
+      copy:
+        src: splashscreen.png
+        dest: /boot
+
     - name: Display a splash screen during boot
       copy:
         src: "{{ item }}"
@@ -636,9 +639,9 @@
           loadkeys
 
     - name: Configure systemd to launch Attract-Mode
-      copy:
-        src: attract.conf
-        dest: /etc/systemd/system/getty@tty1.service.d/
+      template:
+        src: attract.conf.j2
+        dest: /etc/systemd/system/getty@tty1.service.d/attract.conf
 
     - name: Synchronize locally installed software
       synchronize:

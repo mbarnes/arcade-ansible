@@ -2,7 +2,7 @@
 ExecStart=
 ExecStart=/usr/local/bin/attract --loglevel debug
 Restart=on-failure
-User=pi
+User={{ ansible_user_id }}
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=frontend

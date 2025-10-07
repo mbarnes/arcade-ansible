@@ -2,7 +2,7 @@
 Description=Splash screen for Raspberry Pi
 
 [Service]
-ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose /home/pi/splashscreen.png
+ExecStart=/usr/bin/fbi -d /dev/fb0 --noverbose /boot/splashscreen.png
 StandardInput=tty
 
 [Install]
