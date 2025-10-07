@@ -581,21 +581,21 @@
     - name: Install required packages
       package:
         name:
-        - console-tools
         - fbi
+        - kbd
         - tmux
         - vim
         # For MAME
         - libegl1
         - libgles2
         - libpugixml1v5
-        - libutf8proc2
+        - libutf8proc3
         # For Attract-Mode
         - libarchive13
-        - libavformat59
+        - libavformat61
         - libgbm1
         - libopenal1
-        - libswscale6
+        - libswscale8
         state: present
 
     # This task is for removing obsolete dependency
