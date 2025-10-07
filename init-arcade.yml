@@ -711,7 +711,7 @@
       rsync_opts: --ignore-existing
 
   - name: Generate default mame configuration
-    command: /usr/local/bin/mamecocktail -createconfig
+    command: /usr/local/bin/mamecocktail -createconfig -pluginspath /usr/local/games/mame/plugins/
     args:
       chdir: "{{ mame_base_dir }}/ini"
 
