@@ -478,9 +478,12 @@
     - console=tty3
     - root=/dev/mmcblk0p2
     - rootfstype=ext4
-    - elevator=deadline
     - fsck.repair=yes
     - rootwait
+    # 802.11 Regulatory Domain
+    # FIXME Do not hard-code the country code
+    - cfg80211.ieee80211_regdom=US
+    # Suppress informational boot messages
     - quiet
     # Disable Raspberry Pi logo
     - logo.nologo
