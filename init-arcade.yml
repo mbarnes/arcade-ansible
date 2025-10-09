@@ -728,6 +728,8 @@
       value: 1
     - key: dial_device
       value: mouse
+    - key: oslog
+      value: 1
     - key: pluginspath
       value: /usr/local/games/mame/plugins
     - key: rompath
@@ -742,6 +744,8 @@
       value: mouse
     - key: unevenstretch
       value: 0
+    - key: verbose
+      value: 1
     - key: video
       value: accel
     - key: videodriver
