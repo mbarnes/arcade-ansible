@@ -376,6 +376,7 @@
         NO_X11: 1
         NO_USE_XINPUT: 1
         TARGETOS: linux
+        OPTIMIZE: fast
         ARCHOPTS: "{{ raspberry_pi_cflags }}"
         USE_SYSTEM_LIB_ASIO: 1
         USE_SYSTEM_LIB_EXPAT: 1
