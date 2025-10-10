@@ -751,8 +751,6 @@
       value: accel
     - key: videodriver
       value: kmsdrm
-    - key: waitvsync
-      value: 1
 
   - name: Customize mame configuration (plugin.ini)
     lineinfile:
