@@ -686,6 +686,7 @@
       path: "{{ mame_base_dir }}/{{ item }}"
       state: directory
     loop:
+    - artwork
     - cfg
     - dats
     - flyers
