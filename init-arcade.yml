@@ -733,6 +733,8 @@
       value: 1
     - key: pluginspath
       value: /usr/local/games/mame/plugins
+    - key: positional_device
+      value: mouse
     - key: rompath
       value: roms
     - key: samplerate
