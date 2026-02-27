@@ -152,6 +152,10 @@
     sdl_git_repo_ref: release-2.32.10
     sdlttf_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
     sdlttf_git_repo_ref: release-2.24.0
+    sdl3_git_repo_url: https://github.com/libsdl-org/SDL.git
+    sdl3_git_repo_ref: release-3.4.2
+    sdlttf3_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
+    sdlttf3_git_repo_ref: release-3.2.2
     mame_git_repo_url: https://github.com/mbarnes/mame.git
     mame_git_repo_ref: subtarget-cocktail-0286
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
@@ -239,6 +243,10 @@
     file:
       path: "{{ git_base_dir }}"
       state: directory
+
+  #------------
+  # Build SDL2
+  #------------
 
   # SDL modifies its own "include/SDL_config.h" during
   # configuration.  To avoid needless recompilation on
@@ -350,10 +358,102 @@
     become: yes
     become_user: root
 
+  #------------
+  # Build SDL3
+  #------------
+
+  - name: Clone SDL from git
+    git:
+      repo: "{{ sdl3_git_repo_url }}"
+      dest: "{{ git_base_dir }}/SDL3"
+      version: "{{ sdl3_git_repo_ref }}"
+      depth: 1
+
+  - name: Configure SDL to use OpenGL ES
+    command:
+      chdir: "{{ git_base_dir }}/SDL3"
+      argv:
+      - "/usr/bin/cmake"
+      - "-S ."
+      - "-B build"
+      - "-DCMAKE_BUILD_TYPE=Release"
+      - "-DCMAKE_C_FLAGS={{ raspberry_pi_cflags }}"
+      - "-DSDL_CAMERA=OFF"
+      - "-DSDL_OPENGL=OFF"
+      - "-DSDL_PULSEAUDIO=OFF"
+      - "-DSDL_RPI=OFF"
+      - "-DSDL_TESTS=OFF"
+      - "-DSDL_VULKAN=OFF"
+      - "-DSDL_WAYLAND=OFF"
+      - "-DSDL_X11=OFF"
+      - "-DSDL_ALSA=ON"
+      - "-DSDL_KMSDRM=ON"
+      - "-DSDL_OPENGLES=ON"
+      - "-DSDL_UNIX_CONSOLE_BUILD=ON"
+
+  - name: Build SDL from git
+    command:
+      chdir: "{{ git_base_dir }}/SDL3"
+      argv:
+      - "/usr/bin/cmake"
+      - "--build"
+      - "build"
+      - "--parallel"
+      - "{{ ansible_processor_vcpus }}"
+
+  - name: Install SDL as root
+    command:
+      chdir: "{{ git_base_dir }}/SDL3"
+      argv:
+      - "/usr/bin/cmake"
+      - "--install"
+      - "build"
+    become: yes
+    become_user: root
+
+  - name: Clone SDL_ttf from git
+    git:
+      repo: "{{ sdlttf3_git_repo_url }}"
+      dest: "{{ git_base_dir }}/SDL_ttf3"
+      version: "{{ sdlttf3_git_repo_ref }}"
+      depth: 1
+
+  - name: Configure SDL_ttf
+    command:
+      chdir: "{{ git_base_dir }}/SDL_ttf3"
+      argv:
+      - "/usr/bin/cmake"
+      - "-S ."
+      - "-B build"
+
+  - name: Build SDL_ttf from git
+    command:
+      chdir: "{{ git_base_dir }}/SDL_ttf3"
+      argv:
+      - "/usr/bin/cmake"
+      - "--build"
+      - "build"
+      - "--parallel"
+      - "{{ ansible_processor_vcpus }}"
+
+  - name: Install SDL_ttf as root
+    command:
+      chdir: "{{ git_base_dir }}/SDL_ttf3"
+      argv:
+      - "/usr/bin/cmake"
+      - "--install"
+      - "build"
+    become: yes
+    become_user: root
+
   - name: Run ldconfig as root
     command: /sbin/ldconfig
     become: yes
     become_user: root
+
+  #------------
+  # Build MAME
+  #------------
 
   - name: Clone MAME from git
     git:
@@ -372,6 +472,7 @@
         REGENIE: 1
         NOWERROR: 1
         IGNORE_GIT: 1
+        OSD: sdl3
         NO_OPENGL: 1
         NO_X11: 1
         NO_USE_XINPUT: 1
@@ -409,6 +510,10 @@
     become: yes
     become_user: root
 
+  #------------
+  # Build SFML
+  #------------
+
   - name: Clone SFML for the Raspberry Pi from git
     git:
       repo: "{{ sfml_pi_git_repo_url }}"
@@ -436,6 +541,10 @@
       target: install
     become: yes
     become_user: root
+
+  #--------------------
+  # Build Attract-Mode
+  #--------------------
 
   - name: Clone Attract-Mode from git
     git:
