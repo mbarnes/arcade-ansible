@@ -157,7 +157,7 @@
     sdlttf3_git_repo_url: https://github.com/libsdl-org/SDL_ttf.git
     sdlttf3_git_repo_ref: release-3.2.2
     mame_git_repo_url: https://github.com/mbarnes/mame.git
-    mame_git_repo_ref: subtarget-cocktail-0287
+    mame_git_repo_ref: subtarget-cocktail-0288
     sfml_pi_git_repo_url: https://github.com/mickelson/sfml-pi.git
     sfml_pi_git_repo_ref: master
     attract_git_repo_url: https://github.com/mickelson/attract.git
@@ -185,6 +185,7 @@
       - git
       - build-essential
       - python3-apt
+      - qmake6
       # For SDL
       - automake
       - libasound2-dev
