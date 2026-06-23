@@ -473,7 +473,7 @@
         REGENIE: 1
         NOWERROR: 1
         IGNORE_GIT: 1
-        OSD: sdl3
+        OSD: sdl
         NO_OPENGL: 1
         NO_X11: 1
         NO_USE_XINPUT: 1
